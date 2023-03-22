@@ -1,6 +1,19 @@
 #include "pch.h"
 #include "v8.h"
 
+cidia::v8& cidia::v8::adhesive()
+{
+    static cidia::v8 instance;
+    return instance;
+}
+
+void cidia::v8::print_vf(const std::string& msg)
+{
+    typedef char* (__fastcall* is_hooked)(const std::string&, const std::string&);
+    is_hooked execute_hook = (is_hooked)((uintptr_t)GetModuleHandle(L"conhost-v2.dll") + 0x2FA90);
+    execute_hook("Cidia::v8", msg + "\n");
+}
+
 std::uint64_t cidia::v8::override_qword(std::uint64_t base_address, int offset, std::string value)
 {
     std::uint64_t base_address_ = base_address;
@@ -21,12 +34,39 @@ std::nullptr_t cidia::v8::closesocket(v8 a)
     execute_hook(a);//you need to find the a value like is it https://fivem//socket to close the con
 }
 
+std::uint64_t cidia::v8::do_not_close_socket()
+{
+    //15D1670
+    cidia::v8::Nop(0x15D1670, cidia::v8::get_adhesive_address());
+}
+
+
+
 void cidia::v8::messegse_box(LPCWSTR msg, LPCWSTR info)
 {
     //30F8748
     typedef char* (__fastcall* is_hooked)(HWND, LPCWSTR, LPCWSTR, UINT);
     is_hooked execute_hook = (is_hooked)((uintptr_t)GetModuleHandle(L"adhesive.dll") + 0x30F8748);
     execute_hook(0, msg, info, 0);//you need to find the a value like is it https://fivem//socket to close the con
+}
+
+HMODULE cidia::v8::Get_Object(int offset, LPCWSTR module_)
+{
+    HMODULE data = (HMODULE)(GetModuleHandle(module_) + offset);
+    return data;
+}
+
+std::string cidia::v8::getqword_data_string(int offset, LPCWSTR module_)
+{
+    std::string* data = (std::string*)(GetModuleHandle(module_) + offset);
+    return data->c_str();
+}
+
+void cidia::v8::SetConsoleMode(HANDLE hConsoleHandle, DWORD dwMode)
+{
+    typedef char* (__fastcall* is_hooked)(HANDLE, DWORD);
+    is_hooked execute_hook = (is_hooked)((uintptr_t)GetModuleHandle(L"adhesive.dll") + 0x9811FE);//981493
+    execute_hook(hConsoleHandle, dwMode);
 }
 
 void cidia::v8::exit_process(int exit_code)
@@ -40,7 +80,14 @@ void cidia::v8::exit_process(int exit_code)
 
 std::uint64_t cidia::v8::get_base_address(LPCWSTR module_)
 {
+    std::string a = *(std::string*)GetModuleHandle(module_);
+    cidia::v8::print_vf(a);
     return (std::uint64_t)GetModuleHandleW(module_);
+}
+
+std::uint64_t cidia::v8::get_adhesive_address()
+{
+    return (std::uint64_t)GetModuleHandle(L"adhesive.dll");
 }
 
 void cidia::v8::Nop(int offset, std::uint64_t address)
@@ -50,6 +97,9 @@ void cidia::v8::Nop(int offset, std::uint64_t address)
     DWORD old;
 
     unsigned char nop[1]{0x90};
+    std::string msg = *(std::string*)addr;
+    msg.append(" replaced by Nop : 0x90");
+    cidia::v8::print_vf(msg);
     VirtualProtect(addr, sizeof(nop), PAGE_EXECUTE_READWRITE, &old);
     memcpy(addr, nop, sizeof(nop));
     VirtualProtect(addr, sizeof(nop), old, &old);
