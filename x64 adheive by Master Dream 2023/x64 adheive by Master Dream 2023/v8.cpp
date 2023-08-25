@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "v8.h"
 
+// this was made like 10 days in 2023 so all offsets needs to be updated
+
 cidia::v8& cidia::v8::adhesive()
 {
     static cidia::v8 instance;
