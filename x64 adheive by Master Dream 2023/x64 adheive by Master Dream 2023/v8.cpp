@@ -33,7 +33,7 @@ std::nullptr_t cidia::v8::closesocket(v8 a)
 {
     typedef char* (__fastcall* is_hooked)(v8 b);
     is_hooked execute_hook = (is_hooked)((uintptr_t)GetModuleHandle(L"adhesive.dll") + 0xA70E21);
-    execute_hook(a);//you need to find the a value like is it https://fivem//socket to close the con
+    execute_hook(a);
 }
 
 std::uint64_t cidia::v8::do_not_close_socket()
@@ -49,7 +49,7 @@ void cidia::v8::messegse_box(LPCWSTR msg, LPCWSTR info)
     //30F8748
     typedef char* (__fastcall* is_hooked)(HWND, LPCWSTR, LPCWSTR, UINT);
     is_hooked execute_hook = (is_hooked)((uintptr_t)GetModuleHandle(L"adhesive.dll") + 0x30F8748);
-    execute_hook(0, msg, info, 0);//you need to find the a value like is it https://fivem//socket to close the con
+    execute_hook(0, msg, info, 0);
 }
 
 HMODULE cidia::v8::Get_Object(int offset, LPCWSTR module_)
